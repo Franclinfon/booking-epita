@@ -46,8 +46,21 @@ public class SecurityConfiguration {
             .build();
     }
 
-    // Step 3: add InMemoryUserDetailsManager
-    // ...
-    // Step 3: end
+    @Bean
+    public UserDetailsService userDetailsService() {
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password("{bcrypt}$2a$10$pcinn2/mb5vWsLTST/SxVOWsoi3oKG8O/FDtfbi65hutsCyxDhE.u")
+                .roles("ADMIN")
+                .build();
+
+        UserDetails guest = User.builder()
+                .username("guest")
+                .password("{bcrypt}$2a$10$IBuk0VGnt5gwY3oWEobu2eb0Zoq8qVhMddtFG.tIowD/VKpQP93T.")
+                .roles("GUEST")
+                .build();
+
+        return new InMemoryUserDetailsManager(admin, guest);
+    }
 
 }
