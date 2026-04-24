@@ -1,0 +1,62 @@
+name: pr-security
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+
+  dependencies-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+
+      - name: Run OSV Scanner (after)
+        uses: google/osv-scanner-action/osv-scanner-action@main
+        with:
+          scan-args: |-
+            --format json
+            --output after.json
+            ./
+
+      - name: Checkout baseline commit
+        run: |
+          git checkout ${{ github.event.pull_request.base.sha }}
+
+      - name: Run OSV Scanner (before)
+        uses: google/osv-scanner-action/osv-scanner-action@main
+        with:
+          scan-args: |-
+            --format json
+            --output before.json
+            ./
+
+      - name: Compare
+        run: |
+          echo "Compare before/after"
+          cat before.json
+          cat after.json
+
+  sourcecode-analysis:
+    runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: |
+          semgrep scan --config auto --sarif --output semgrep.sarif
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-report
+          path: semgrep.sarif
