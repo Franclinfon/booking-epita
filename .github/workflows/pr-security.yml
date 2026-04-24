@@ -23,7 +23,7 @@ jobs:
             --format json
             --output after.json
             ./
-        continue-on-error: json
+        continue-on-error: true
 
       - name: Checkout baseline commit
         run: |
@@ -36,7 +36,7 @@ jobs:
             --format json
             --output before.json
             ./
-        continue-on-error: json
+        continue-on-error: true
 
       - name: Compare
         run: |
